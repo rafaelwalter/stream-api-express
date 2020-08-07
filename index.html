@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Streaming response from backend</title>
+</head>
+<body>
+    <ul id="list"></ul>
+    <script>
+        (async () => {
+          const list = document.getElementById('list');
+
+          const push = (content) => {
+            const item = document.createElement('li');
+            const str = new TextDecoder('utf-8').decode(content);
+            item.innerText = str;
+            list.appendChild(item);
+            console.log(JSON.parse(str));
+          };
+
+          const response = await fetch('/api');
+          const reader = response.body.getReader();
+
+          list.append('Start streaming');
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            push(value);
+          }
+
+          list.append('Done');
+        })();
+    </script>
+</body>
+</html>
